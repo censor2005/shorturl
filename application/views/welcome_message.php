@@ -71,25 +71,46 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <body>
 
 <div id="container">
-	<h1>Welcome to CodeIgniter!</h1>
+	<h1>Укорачиватель ссылок (У-ь)</h1>
 
 	<div id="body">
-	  <div class="form-group">
-		<label>Введите URL для укорачивания:</label>
-		<input type="text" class="form-control" id="url" placeholder="http://">
-	  </div>
+		<div class="form-group">
+			<label>Введите URL для укорачивания:</label>
+			<input type="text" class="form-control" id="url" placeholder="http://">
+		</div>
+		<div class="form-group">
+			<label for="">Срок жизни ссылки:</label>
+			<select name="expire" id="expire" class="custom-select">
+				<option value="0">Без срока</option>
+				<option value="year">1 год</option>
+				<option value="month">1 месяц</option>
+				<option value="day">1 день</option>
+				<option value="hour">1 час</option>
+			</select>
+		</div>
 		<button class="btn btn-primary" id="generate">Генерировать</button>
-		<div class="alert alert-success" id="result" style="display:none;">Ваша короткая ссылка: <input type="text"></div>
+		<div class="alert alert-success" id="result" style="display:none;">Ваша короткая ссылка: <input type="text"><br>Статистика по ссылке: <span></span></div>
+		<div class="alert alert-danger" id="result_error" style="display:none;">Ошибка при генерации ссылки</div>
 	</div>
 	<script>
 	$(function(){
 		$("#generate").on('click', function(){
 			var $url = encodeURIComponent($("#url").val());
-			$.post('process', {url:$url}, function(data){
+			var $expire = $("#expire").val();
+			$.post('process', {url:$url, expire:$expire}, function(data){
 				//alert(data);
 				console.log(data);
-				$("#result input").val( "<?php echo base_url();?>s/" + data.short);
-				$("#result").show();
+				if(data.status != 0){
+					$("#result input").val("Ошибка при генерации");
+					$("#result_error").show();
+					$("#result").hide();
+				} else {
+					$("#result input").val( "<?php echo base_url();?>s/" + data.short);
+					$("#result span").html("<a href='<?php echo base_url();?>stat/show/"+data.id+"'><?php echo base_url();?>stat/show/"+data.id+"</a>");
+					$("#result_error").hide();
+					$("#result").show();
+				}
+				
 			}, "json");
 		});
 	});

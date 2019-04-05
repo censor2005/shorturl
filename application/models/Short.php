@@ -37,10 +37,14 @@
      * @param string short url
      * @return boolean
      */
-    public function put($url, $short){
+    public function put($url, $short, $expire_date = false){
+        if($expire_date === false){
+            $expire_date = time() + 100*365*24*60*60;
+        }
         $insert = [
             'url' => trim($url),
             'short' => $short,
+            'expire' => date('Y-m-d H:i:s', $expire_date),
         ];
         return $this->db->insert('shorts', $insert);
     }
@@ -59,6 +63,12 @@
         return $this->db->where('short', $short)->get('shorts')->row();
     }
 
+    /**
+     * 
+     */
+    public function getById($id = false){
+        return $this->db->where('id', $id)->get('shorts')->row();
+    }
 /**
  * funtion to get data as object by full url
  * returns object if exists, false otherwise
